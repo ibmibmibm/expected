@@ -1,0 +1,103 @@
+language: cpp
+
+matrix:
+  include:
+    - name: Linux g++ 7
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - g++-7
+            - cmake
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
+      script: &script_linux
+        - /usr/bin/cmake -B build -S .
+        - /usr/bin/cmake --build build
+        - /usr/bin/cmake --build build --target test
+    - name: Linux g++ 8
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - g++-8
+            - cmake
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
+      script: *script_linux
+    - name: Linux g++ 9
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - g++-9
+            - cmake
+      env:
+        - CC=gcc-9
+        - CXX=g++-9
+      script: *script_linux
+    - name: Linux clang++ 7
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-bionic-7
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-7
+            - cmake
+      env:
+        - CC=clang-7
+        - CXX=clang++-7
+      script: *script_linux
+    - name: Linux clang++ 8
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-bionic-8
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-8
+            - cmake
+      env:
+        - CC=clang-8
+        - CXX=clang++-8
+      script: *script_linux
+    - name: Linux clang++ 9
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-bionic-9
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-9
+            - cmake
+      env:
+        - CC=clang-9
+        - CXX=clang++-9
+      script: *script_linux
