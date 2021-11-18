@@ -24,7 +24,7 @@ inline namespace fundamentals_v3 {
 
 template <class T, class E> class expected;
 template <class E> class unexpected;
-template <class E> unexpected(E)->unexpected<E>;
+template <class E> unexpected(E) -> unexpected<E>;
 
 template <class E> class bad_expected_access;
 template <> class bad_expected_access<void> : public exception {
@@ -35,9 +35,7 @@ template <class E>
 class bad_expected_access : public bad_expected_access<void> {
 public:
   explicit bad_expected_access(E e) : m_error(move(e)) {}
-  virtual const char *what() const noexcept override {
-    return "Bad expected access";
-  }
+  const char *what() const noexcept override { return "Bad expected access"; }
   const E &error() const & { return m_error; }
   const E &&error() const && { return move(m_error); }
   E &error() & { return m_error; }
@@ -89,7 +87,7 @@ public:
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr explicit unexpected(in_place_t, Args &&... args) noexcept(NoExcept)
+  constexpr explicit unexpected(in_place_t, Args &&...args) noexcept(NoExcept)
       : m_val(forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -97,7 +95,7 @@ public:
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr explicit unexpected(in_place_t, initializer_list<U> il,
-                                Args &&... args) noexcept(NoExcept)
+                                Args &&...args) noexcept(NoExcept)
       : m_val(il, forward<Args>(args)...) {}
   template <class Err = E,
             enable_if_t<is_constructible_v<E, Err> &&
@@ -139,8 +137,8 @@ public:
     return *this;
   }
   constexpr const E &value() const &noexcept { return m_val; }
-  constexpr E &value() & noexcept { return m_val; }
-  constexpr E &&value() && noexcept { return move(m_val); }
+  constexpr E &value() &noexcept { return m_val; }
+  constexpr E &&value() &&noexcept { return move(m_val); }
   constexpr const E &&value() const &&noexcept { return move(m_val); }
 
   template <class Err = E, enable_if_t<is_swappable_v<Err>> * = nullptr,
@@ -246,12 +244,14 @@ struct expected_storage_base {
       : m_has_val(true), m_val() {}
   constexpr expected_storage_base(no_init_t) noexcept
       : m_has_val(false), m_no_init() {}
+  constexpr expected_storage_base(const expected_storage_base &) = default;
+  constexpr expected_storage_base &
+  operator=(const expected_storage_base &) = default;
 
   template <class... Args,
             enable_if_t<is_constructible_v<T, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<T, Args...>>
-  constexpr expected_storage_base(in_place_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(in_place_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<T, initializer_list<U>, Args...>> * =
@@ -259,14 +259,13 @@ struct expected_storage_base {
             bool NoExcept =
                 is_nothrow_constructible_v<T, initializer_list<U>, Args...>>
   constexpr expected_storage_base(in_place_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(move(il), forward<Args>(args)...) {}
 
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr expected_storage_base(unexpect_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(unexpect_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -274,7 +273,7 @@ struct expected_storage_base {
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr expected_storage_base(unexpect_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, move(il), forward<Args>(args)...) {}
 
   ~expected_storage_base() noexcept(
@@ -308,12 +307,14 @@ template <class T, class E> struct expected_storage_base<T, E, true, true> {
       : m_has_val(true), m_val() {}
   constexpr expected_storage_base(no_init_t) noexcept
       : m_has_val(false), m_no_init() {}
+  constexpr expected_storage_base(const expected_storage_base &) = default;
+  constexpr expected_storage_base &
+  operator=(const expected_storage_base &) = default;
 
   template <class... Args,
             enable_if_t<is_constructible_v<T, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<T, Args...>>
-  constexpr expected_storage_base(in_place_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(in_place_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<T, initializer_list<U>, Args...>> * =
@@ -321,14 +322,13 @@ template <class T, class E> struct expected_storage_base<T, E, true, true> {
             bool NoExcept =
                 is_nothrow_constructible_v<T, initializer_list<U>, Args...>>
   constexpr expected_storage_base(in_place_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(move(il), forward<Args>(args)...) {}
 
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr expected_storage_base(unexpect_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(unexpect_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -336,7 +336,7 @@ template <class T, class E> struct expected_storage_base<T, E, true, true> {
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr expected_storage_base(unexpect_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, move(il), forward<Args>(args)...) {}
 
   ~expected_storage_base() noexcept = default;
@@ -359,12 +359,14 @@ template <class T, class E> struct expected_storage_base<T, E, true, false> {
       : m_has_val(true), m_val() {}
   constexpr expected_storage_base(no_init_t) noexcept
       : m_has_val(false), m_no_init() {}
+  constexpr expected_storage_base(const expected_storage_base &) = default;
+  constexpr expected_storage_base &
+  operator=(const expected_storage_base &) = default;
 
   template <class... Args,
             enable_if_t<is_constructible_v<T, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<T, Args...>>
-  constexpr expected_storage_base(in_place_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(in_place_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<T, initializer_list<U>, Args...>> * =
@@ -372,14 +374,13 @@ template <class T, class E> struct expected_storage_base<T, E, true, false> {
             bool NoExcept =
                 is_nothrow_constructible_v<T, initializer_list<U>, Args...>>
   constexpr expected_storage_base(in_place_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(move(il), forward<Args>(args)...) {}
 
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr expected_storage_base(unexpect_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(unexpect_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -387,7 +388,7 @@ template <class T, class E> struct expected_storage_base<T, E, true, false> {
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr expected_storage_base(unexpect_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, move(il), forward<Args>(args)...) {}
 
   ~expected_storage_base() noexcept(is_nothrow_destructible_v<E>) {
@@ -416,12 +417,14 @@ template <class T, class E> struct expected_storage_base<T, E, false, true> {
       : m_has_val(true), m_val() {}
   constexpr expected_storage_base(no_init_t) noexcept
       : m_has_val(false), m_no_init() {}
+  constexpr expected_storage_base(const expected_storage_base &) = default;
+  constexpr expected_storage_base &
+  operator=(const expected_storage_base &) = default;
 
   template <class... Args,
             enable_if_t<is_constructible_v<T, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<T, Args...>>
-  constexpr expected_storage_base(in_place_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(in_place_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<T, initializer_list<U>, Args...>> * =
@@ -429,14 +432,13 @@ template <class T, class E> struct expected_storage_base<T, E, false, true> {
             bool NoExcept =
                 is_nothrow_constructible_v<T, initializer_list<U>, Args...>>
   constexpr expected_storage_base(in_place_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(true), m_val(move(il), forward<Args>(args)...) {}
 
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr expected_storage_base(unexpect_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(unexpect_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -444,7 +446,7 @@ template <class T, class E> struct expected_storage_base<T, E, false, true> {
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr expected_storage_base(unexpect_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(in_place, move(il), forward<Args>(args)...) {}
 
   ~expected_storage_base() noexcept(is_nothrow_destructible_v<T>) {
@@ -473,12 +475,14 @@ template <class E> struct expected_storage_base<void, E, false, false> {
       : m_has_val(false), m_no_init() {}
   constexpr expected_storage_base(in_place_t) noexcept
       : m_has_val(true), m_no_init() {}
+  constexpr expected_storage_base(const expected_storage_base &) = default;
+  constexpr expected_storage_base &
+  operator=(const expected_storage_base &) = default;
 
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr expected_storage_base(unexpect_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(unexpect_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -486,7 +490,7 @@ template <class E> struct expected_storage_base<void, E, false, false> {
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr expected_storage_base(unexpect_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(move(il), forward<Args>(args)...) {}
 
   ~expected_storage_base() noexcept(is_nothrow_destructible_v<E>) {
@@ -514,12 +518,14 @@ template <class E> struct expected_storage_base<void, E, false, true> {
       : m_has_val(false), m_no_init() {}
   constexpr expected_storage_base(in_place_t) noexcept
       : m_has_val(true), m_no_init() {}
+  constexpr expected_storage_base(const expected_storage_base &) = default;
+  constexpr expected_storage_base &
+  operator=(const expected_storage_base &) = default;
 
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr expected_storage_base(unexpect_t,
-                                  Args &&... args) noexcept(NoExcept)
+  constexpr expected_storage_base(unexpect_t, Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(forward<Args>(args)...) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -527,7 +533,7 @@ template <class E> struct expected_storage_base<void, E, false, true> {
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr expected_storage_base(unexpect_t, initializer_list<U> il,
-                                  Args &&... args) noexcept(NoExcept)
+                                  Args &&...args) noexcept(NoExcept)
       : m_has_val(false), m_unex(move(il), forward<Args>(args)...) {}
 
   ~expected_storage_base() noexcept = default;
@@ -553,8 +559,8 @@ struct expected_view_base : public expected_storage_base<T, E> {
   constexpr const E &&error() const &&noexcept {
     return move(base::m_unex).value();
   }
-  constexpr E &error() & noexcept { return base::m_unex.value(); }
-  constexpr E &&error() && noexcept { return move(base::m_unex).value(); }
+  constexpr E &error() &noexcept { return base::m_unex.value(); }
+  constexpr E &&error() &&noexcept { return move(base::m_unex).value(); }
 
   template <class... Args,
             enable_if_t<is_constructible_v<T, Args...> &&
@@ -563,7 +569,7 @@ struct expected_view_base : public expected_storage_base<T, E> {
                          is_nothrow_move_constructible_v<E>)> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<T, Args...> &&
                 is_nothrow_move_assignable_v<T> &&is_nothrow_destructible_v<E>>
-  T &emplace(Args &&... args) noexcept(NoExcept) {
+  T &emplace(Args &&...args) noexcept(NoExcept) {
     if (has_value()) {
       val() = T(forward<Args>(args)...);
     } else if constexpr (is_nothrow_constructible_v<T, Args...>) {
@@ -594,7 +600,7 @@ struct expected_view_base : public expected_storage_base<T, E> {
             bool NoExcept = is_nothrow_constructible_v<T, initializer_list<U>,
                                                        Args...> &&
                 is_nothrow_move_assignable_v<T> &&is_nothrow_destructible_v<E>>
-  T &emplace(initializer_list<U> il, Args &&... args) noexcept(NoExcept) {
+  T &emplace(initializer_list<U> il, Args &&...args) noexcept(NoExcept) {
     if (has_value()) {
       val() = T(il, forward<Args>(args)...);
     } else if constexpr (is_nothrow_constructible_v<T, Args...>) {
@@ -620,19 +626,19 @@ struct expected_view_base : public expected_storage_base<T, E> {
 protected:
   constexpr const T &val() const &noexcept { return base::m_val; }
   constexpr const T &&val() const &&noexcept { return move(base::m_val); }
-  constexpr T &val() & noexcept { return base::m_val; }
-  constexpr T &&val() && noexcept { return move(base::m_val); }
+  constexpr T &val() &noexcept { return base::m_val; }
+  constexpr T &&val() &&noexcept { return move(base::m_val); }
   template <class... Args,
             enable_if_t<is_constructible_v<T, Args &&...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<T, Args &&...>>
-  void construct_value(Args &&... args) noexcept(NoExcept) {
+  void construct_value(Args &&...args) noexcept(NoExcept) {
     new (addressof(base::m_val)) T(forward<Args>(args)...);
     base::m_has_val = true;
   }
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args &&...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args &&...>>
-  void construct_error(Args &&... args) noexcept(NoExcept) {
+  void construct_error(Args &&...args) noexcept(NoExcept) {
     new (addressof(base::m_unex)) unexpected<E>(forward<Args>(args)...);
     base::m_has_val = false;
   }
@@ -648,8 +654,8 @@ struct expected_view_base<void, E> : public expected_storage_base<void, E> {
   constexpr const E &&error() const &&noexcept {
     return move(base::m_unex).value();
   }
-  constexpr E &error() & noexcept { return base::m_unex.value(); }
-  constexpr E &&error() && noexcept { return move(base::m_unex).value(); }
+  constexpr E &error() &noexcept { return base::m_unex.value(); }
+  constexpr E &&error() &&noexcept { return move(base::m_unex).value(); }
 
   void emplace() noexcept(is_nothrow_destructible_v<E>) {
     if (!has_value()) {
@@ -665,7 +671,7 @@ protected:
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args &&...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args &&...>>
-  void construct_error(Args &&... args) noexcept(NoExcept) {
+  void construct_error(Args &&...args) noexcept(NoExcept) {
     new (addressof(base::m_unex)) unexpected<E>(forward<Args>(args)...);
     base::m_has_val = false;
   }
@@ -1373,7 +1379,7 @@ public:
   template <class... Args,
             enable_if_t<is_constructible_v<T, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<T, Args...>>
-  constexpr explicit expected(in_place_t, Args &&... args) noexcept(NoExcept)
+  constexpr explicit expected(in_place_t, Args &&...args) noexcept(NoExcept)
       : impl_base(in_place, forward<Args>(args)...), ctor_base(in_place) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<T, initializer_list<U>, Args...>> * =
@@ -1381,14 +1387,14 @@ public:
             bool NoExcept =
                 is_nothrow_constructible_v<T, initializer_list<U>, Args...>>
   constexpr explicit expected(in_place_t, initializer_list<U> il,
-                              Args &&... args) noexcept(NoExcept)
+                              Args &&...args) noexcept(NoExcept)
       : impl_base(in_place, move(il), forward<Args>(args)...),
         ctor_base(in_place) {}
 
   template <class... Args,
             enable_if_t<is_constructible_v<E, Args...>> * = nullptr,
             bool NoExcept = is_nothrow_constructible_v<E, Args...>>
-  constexpr explicit expected(unexpect_t, Args &&... args) noexcept(NoExcept)
+  constexpr explicit expected(unexpect_t, Args &&...args) noexcept(NoExcept)
       : impl_base(unexpect, forward<Args>(args)...), ctor_base(in_place) {}
   template <class U, class... Args,
             enable_if_t<is_constructible_v<E, initializer_list<U>, Args...>> * =
@@ -1396,7 +1402,7 @@ public:
             bool NoExcept =
                 is_nothrow_constructible_v<E, initializer_list<U>, Args...>>
   constexpr explicit expected(unexpect_t, initializer_list<U> il,
-                              Args &&... args) noexcept(NoExcept)
+                              Args &&...args) noexcept(NoExcept)
       : impl_base(unexpect, move(il), forward<Args>(args)...),
         ctor_base(in_place) {}
 
@@ -1545,7 +1551,7 @@ public:
                   "T must be copy-constructible and convertible to from U");
     return bool(*this) ? **this : static_cast<T>(forward<U>(v));
   }
-  template <class U> constexpr T value_or(U &&v) && noexcept {
+  template <class U> constexpr T value_or(U &&v) &&noexcept {
     static_assert(!is_move_constructible_v<T> || is_convertible_v<U, T>,
                   "T must be move-constructible and convertible to from U");
     return bool(*this) ? move(**this) : static_cast<T>(forward<U>(v));

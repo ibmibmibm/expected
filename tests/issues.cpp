@@ -106,9 +106,9 @@ TEST_CASE("Issue 43", "[issues.43]") {
 
 using MaybeDataPtr = expected<int, std::unique_ptr<int>>;
 
-MaybeDataPtr test(int i) noexcept { return std::move(i); }
+MaybeDataPtr test(int i) noexcept { return i; }
 
-MaybeDataPtr test2(int i) noexcept { return std::move(i); }
+MaybeDataPtr test2(int i) noexcept { return i; }
 
 TEST_CASE("Issue 49", "[issues.49]") { auto m = test(10).and_then(test2); }
 
